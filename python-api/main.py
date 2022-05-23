@@ -26,18 +26,18 @@ class AccountModel(BaseModel):
     referredBy: Optional[str]
 
 @app.get(
-    "/accounts", response_description="List all accounts", response_model=List[AccountModel]
+    "/accounts", response_description="List all accounts", response_model=List[AccountModel],
 )
 async def list_accounts():
     accounts = await db["accounts"].find().to_list(1000)
     return accounts
 
 @app.get(
-    "/accounts/{email}", response_description="Get specific account",
+    "/accounts/{email}", response_description="Get specific account", response_model=AccountModel,
 )
 async def get_account(email: str):
-    # TODO: Implement get account
-    return email
+    account = await db["accounts"].find_one({"email": email})
+    return account
 
 @app.get(
     "/accounts/{email}/balance", response_description="Get the balance on an account",
