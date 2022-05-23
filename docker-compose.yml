@@ -1,11 +1,22 @@
 version: '3'
 
 services:
-  web_app:
+  mongodb:
     build:
       dockerfile: Dockerfile
-      context: .
+      context: mongodb
+    restart: always
+    env_file:
+      - backend.env
+    volumes:
+      - ./seed-data:/seed
+  python_api:
+    build:
+      dockerfile: Dockerfile
+      context: python-api
     depends_on:
-      - db
+      - mongodb
     ports:
       - "8000:80"
+    env_file:
+      - backend.env
