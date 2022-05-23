@@ -1,4 +1,6 @@
-from fastapi import FastAPI, HTTPException
+import secrets
+
+from fastapi import FastAPI, HTTPException, Depends, status
 
 import motor.motor_asyncio
 import os
@@ -6,11 +8,16 @@ from pydantic import BaseModel
 from typing import List, Optional
 from datetime import datetime
 from fastapi.encoders import jsonable_encoder
+from fastapi.security import HTTPBasic, HTTPBasicCredentials
 
 
 app = FastAPI()
+security = HTTPBasic()
 client = motor.motor_asyncio.AsyncIOMotorClient(os.environ["MONGODB_URL"])
 db = client.ledn
+
+ADMIN_USERNAME = os.environ["LEDN_ADMIN_USERNAME"]
+ADMIN_PASSWORD = os.environ["LEDN_ADMIN_PASSWORD"]
 
 
 class AccountModel(BaseModel):
@@ -57,10 +64,22 @@ async def list_transactions():
     response_description="Get specific account",
     response_model=AccountModel,
 )
-async def get_account(email: str):
+async def get_account(
+    email: str, credentials: HTTPBasicCredentials = Depends(security)
+):
+    correct_username = secrets.compare_digest(credentials.username, ADMIN_USERNAME)
+    correct_password = secrets.compare_digest(credentials.password, ADMIN_PASSWORD)
+    if not (correct_username and correct_password):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Incorrect email or password",
+            headers={"WWW-Authenticate": "Basic"},
+        )
     account = await db["accounts"].find_one({"email": email})
     if not account:
-        raise HTTPException(status_code=404, detail="Account not found")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Account not found"
+        )
     return account
 
 
