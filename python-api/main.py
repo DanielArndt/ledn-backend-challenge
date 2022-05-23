@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Body, status
+from fastapi import FastAPI, Body, status, HTTPException
 from fastapi.responses import JSONResponse
 
 import motor.motor_asyncio
@@ -13,11 +13,6 @@ from bson import ObjectId
 app = FastAPI()
 client = motor.motor_asyncio.AsyncIOMotorClient(os.environ["MONGODB_URL"])
 db = client.ledn
-
-
-@app.get("/")
-def read_root():
-    return {"Hello": "World"}
 
 
 class AccountModel(BaseModel):
@@ -57,6 +52,8 @@ async def list_transactions():
 )
 async def get_account(email: str):
     account = await db["accounts"].find_one({"email": email})
+    if not account:
+        raise HTTPException(status_code=404, detail="Account not found")
     return account
 
 @app.get(
