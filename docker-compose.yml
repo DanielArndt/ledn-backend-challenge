@@ -11,6 +11,7 @@ services:
     volumes:
       - ./seed-data:/seed
   python_api:
+    command: /start-reload.sh
     build:
       dockerfile: Dockerfile
       context: python-api
@@ -18,3 +19,9 @@ services:
       - mongodb
     env_file:
       - backend.env
+    volumes:
+      - ./python-api:/app
+    ports:
+      - "8000:80"
+    stdin_open: true
+    tty: true
