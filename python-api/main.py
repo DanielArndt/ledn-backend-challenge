@@ -32,3 +32,25 @@ async def list_accounts():
     accounts = await db["accounts"].find().to_list(1000)
     return accounts
 
+@app.get(
+    "/accounts/{email}", response_description="Get specific account",
+)
+async def get_account(email: str):
+    # TODO: Implement get account
+    return email
+
+@app.get(
+    "/accounts/{email}/balance", response_description="Get the balance on an account",
+)
+async def get_account_balance(email: str):
+    # TODO: Implement get account balance
+    return email
+
+@app.post(
+    "/transactions/", response_description="Create a transaction",
+)
+async def create_transaction():
+    # TODO: Implement create transaction
+    # - Debit and credit account
+    # - Transfer between users
+    return None
