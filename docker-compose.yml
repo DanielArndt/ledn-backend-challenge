@@ -16,7 +16,5 @@ services:
       context: python-api
     depends_on:
       - mongodb
-    ports:
-      - "8000:80"
     env_file:
       - backend.env
