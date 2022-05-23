@@ -1,0 +1,17 @@
+version: '3'
+
+services:
+  db:
+    image: mongo
+    restart: always
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: example
+  web_app:
+    build:
+      dockerfile: Dockerfile
+      context: .
+    depends_on:
+      - db
+    ports:
+      - "8000:80"
