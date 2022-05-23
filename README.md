@@ -1,5 +1,10 @@
 # ledn-backend-challenge
 
+## Requirements
+
+- `docker`
+- `docker compose`
+
 ## Build and run the platform
 
 ```
