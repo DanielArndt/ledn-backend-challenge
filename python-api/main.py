@@ -75,10 +75,16 @@ async def get_account_balance(email: str):
     return amount_received - amount_sent
 
 @app.post(
-    "/transactions/", response_description="Create a transaction",
+    "/transactions", response_description="Create a transaction", response_model=TransactionModel, status_code=201
 )
-async def create_transaction():
-    # TODO: Implement create transaction
+async def create_transaction(transaction: TransactionModel):
+    # TODO: Revisit: Is this API sufficient to preform the following?
     # - Debit and credit account
     # - Transfer between users
-    return None
+
+    # FIXME: Should the createdAt time be set by the admin, or by the server?
+    transaction_jsonable = jsonable_encoder(transaction)
+    new_transaction = await db["transactions"].insert_one(transaction_jsonable)
+    created_transaction = await db["transactions"].find_one({"_id": new_transaction.inserted_id})
+
+    return created_transaction
