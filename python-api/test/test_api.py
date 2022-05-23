@@ -21,3 +21,16 @@ def test_get_account_balance_bad_email():
     response = client.get("/accounts/notfound@gmail.com/balance")
     # Arguably, this should return a 404, but still seems like it would be a valid response
     assert response.json() == 0
+
+
+def test_create_transaction():
+    response = client.post(
+        "/transactions",
+        json={
+            "userEmail": "testuser@test.com",
+            "amount": 5,
+            "type": "receive",
+            "createdAt": "2019-12-20T20:18:11.806Z",
+        },
+    )
+    assert response.status_code == 201
