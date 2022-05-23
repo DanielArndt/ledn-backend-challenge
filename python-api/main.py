@@ -1,8 +1,14 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Body, status
+from fastapi.responses import JSONResponse
+
 import motor.motor_asyncio
 import os
 from pydantic import BaseModel, Field
 from typing import List, Optional
+from datetime import datetime
+from fastapi.encoders import jsonable_encoder
+from bson import ObjectId
+
 
 app = FastAPI()
 client = motor.motor_asyncio.AsyncIOMotorClient(os.environ["MONGODB_URL"])
@@ -54,14 +60,19 @@ async def get_account(email: str):
     return account
 
 @app.get(
-    "/accounts/{email}/balance", response_description="Get the balance on an account", response_model=int
+    "/accounts/{email}/balance", response_description="Get the balance for an account", response_model=int
 )
 async def get_account_balance(email: str):
     transactions = await db["transactions"].find({"userEmail": email}).to_list(1000)
 
-    amounts = [transaction["amount"] if transaction["type"] == "receive" else -transaction["amount"] for transaction in transactions]
+    # FIXME: there's probably a way to do this in one query, instead of two
+    received_aggregate = await db["transactions"].aggregate([{"$match": {"userEmail": email, "type": "receive"}}, { "$group": { "_id" : None, "amount_received" : { "$sum": "$amount" } }}]).to_list(1000)
+    sent_aggregate = await db["transactions"].aggregate([{"$match": {"userEmail": email, "type": "send"}}, { "$group": { "_id" : None, "amount_sent" : { "$sum": "$amount" } }}]).to_list(1000)
 
-    return sum(amounts)
+    amount_received = received_aggregate[0]["amount_received"]
+    amount_sent = sent_aggregate[0]["amount_sent"]
+
+    return amount_received - amount_sent
 
 @app.post(
     "/transactions/", response_description="Create a transaction",
