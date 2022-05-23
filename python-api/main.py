@@ -60,14 +60,12 @@ async def get_account(email: str):
     "/accounts/{email}/balance", response_description="Get the balance for an account", response_model=int
 )
 async def get_account_balance(email: str):
-    transactions = await db["transactions"].find({"userEmail": email}).to_list(1000)
-
     # FIXME: there's probably a way to do this in one query, instead of two
     received_aggregate = await db["transactions"].aggregate([{"$match": {"userEmail": email, "type": "receive"}}, { "$group": { "_id" : None, "amount_received" : { "$sum": "$amount" } }}]).to_list(1000)
     sent_aggregate = await db["transactions"].aggregate([{"$match": {"userEmail": email, "type": "send"}}, { "$group": { "_id" : None, "amount_sent" : { "$sum": "$amount" } }}]).to_list(1000)
 
-    amount_received = received_aggregate[0]["amount_received"]
-    amount_sent = sent_aggregate[0]["amount_sent"]
+    amount_received = received_aggregate[0]["amount_received"] if received_aggregate else 0
+    amount_sent = sent_aggregate[0]["amount_sent"] if sent_aggregate else 0
 
     return amount_received - amount_sent
 

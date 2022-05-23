@@ -16,3 +16,9 @@ def test_get_account():
 def test_get_account_bad_email():
     response = client.get("/accounts/notfound@gmail.com")
     assert response.status_code == 404
+
+
+def test_get_account_balance_bad_email():
+    response = client.get("/accounts/notfound@gmail.com/balance")
+    # Arguably, this should return a 404, but still seems like it would be a valid response
+    assert response.json() == 0
