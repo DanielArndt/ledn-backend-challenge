@@ -2,7 +2,7 @@ from fastapi import FastAPI
 import motor.motor_asyncio
 import os
 from pydantic import BaseModel, Field
-from typing import List
+from typing import List, Optional
 
 app = FastAPI()
 client = motor.motor_asyncio.AsyncIOMotorClient(os.environ["MONGODB_URL"])
@@ -15,7 +15,15 @@ def read_root():
 
 
 class AccountModel(BaseModel):
-    first_name: str = Field(alias="firstName")
+    firstName: str
+    lastName: str
+    country: str
+    email: str
+    dob: str
+    mfa: Optional[str]
+    createdAt: str
+    updatedAt: str
+    referredBy: Optional[str]
 
 @app.get(
     "/accounts", response_description="List all accounts", response_model=List[AccountModel]
