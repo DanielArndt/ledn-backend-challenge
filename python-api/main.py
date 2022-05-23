@@ -27,8 +27,8 @@ class AccountModel(BaseModel):
     email: str
     dob: str
     mfa: Optional[str]
-    createdAt: str
-    updatedAt: str
+    createdAt: datetime
+    updatedAt: datetime
     referredBy: Optional[str]
 
 @app.get(
@@ -43,7 +43,7 @@ class TransactionModel(BaseModel):
     userEmail: str
     amount: int
     type: str
-    createdAt: str
+    createdAt: datetime
 
 @app.get(
     "/transactions", response_description="List all transactions", response_model=List[TransactionModel],
