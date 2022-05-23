@@ -32,6 +32,20 @@ async def list_accounts():
     accounts = await db["accounts"].find().to_list(1000)
     return accounts
 
+
+class TransactionModel(BaseModel):
+    userEmail: str
+    amount: int
+    type: str
+    createdAt: str
+
+@app.get(
+    "/transactions", response_description="List all transactions", response_model=List[TransactionModel],
+)
+async def list_transactions():
+    transactions = await db["transactions"].find().to_list(1000)
+    return transactions
+
 @app.get(
     "/accounts/{email}", response_description="Get specific account", response_model=AccountModel,
 )
