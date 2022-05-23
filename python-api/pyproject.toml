@@ -6,6 +6,7 @@ authors = ["Daniel Arndt <dan@arndt.ca>"]
 
 [tool.poetry.dependencies]
 python = "^3.8"
+motor = "^3.0.0"
 
 [tool.poetry.dev-dependencies]
 

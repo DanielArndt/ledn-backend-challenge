@@ -1,0 +1,7 @@
+version: '3'
+
+services:
+  web_app:
+    command: /start-reload.sh
+    volumes:
+      - ./python-api:/app
