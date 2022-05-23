@@ -1,8 +1,8 @@
 [tool.poetry]
-name = "ledn-backend-challenge"
+name = "ledn-backend-challenge-python"
 version = "0.1.0"
 description = ""
-authors = ["Your Name <you@example.com>"]
+authors = ["Daniel Arndt <dan@arndt.ca>"]
 
 [tool.poetry.dependencies]
 python = "^3.8"
