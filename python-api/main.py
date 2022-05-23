@@ -54,11 +54,14 @@ async def get_account(email: str):
     return account
 
 @app.get(
-    "/accounts/{email}/balance", response_description="Get the balance on an account",
+    "/accounts/{email}/balance", response_description="Get the balance on an account", response_model=int
 )
 async def get_account_balance(email: str):
-    # TODO: Implement get account balance
-    return email
+    transactions = await db["transactions"].find({"userEmail": email}).to_list(1000)
+
+    amounts = [transaction["amount"] if transaction["type"] == "receive" else -transaction["amount"] for transaction in transactions]
+
+    return sum(amounts)
 
 @app.post(
     "/transactions/", response_description="Create a transaction",
