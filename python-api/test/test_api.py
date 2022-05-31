@@ -79,6 +79,20 @@ def test_create_transaction_credit():
     assert response.status_code == status.HTTP_201_CREATED
 
 
+def test_create_transaction_negative_amount():
+    response = client.post(
+        "/transactions",
+        json={
+            "userEmail": "Dylan_Lockman@yahoo.com",
+            "amount": -5,
+            "type": "credit",
+            "createdAt": "2019-12-20T20:18:11.806Z",
+        },
+        headers={"Authorization": AUTH_HEADER},
+    )
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+
+
 def test_create_transaction_debit():
     response = client.post(
         "/transactions",
@@ -148,3 +162,17 @@ def test_create_transfer_account_does_not_exist():
         headers={"Authorization": AUTH_HEADER},
     )
     assert response.status_code == status.HTTP_400_BAD_REQUEST
+
+
+def test_create_transfer_negative_amount():
+    response = client.post(
+        "/transfers",
+        json={
+            "fromEmail": "Estella_Metz40@gmail.com",
+            "toEmail": "Dylan_Lockman@yahoo.com",
+            "amount": -10,
+            "createdAt": "2019-12-20T20:18:11.806Z",
+        },
+        headers={"Authorization": AUTH_HEADER},
+    )
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY

@@ -2,7 +2,7 @@ from datetime import datetime
 from enum import Enum
 from typing import Optional
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 class AccountModel(BaseModel):
@@ -26,7 +26,7 @@ class TransactionType(str, Enum):
 
 class TransactionModel(BaseModel):
     userEmail: str
-    amount: int
+    amount: int = Field(ge=1)
     type: TransactionType
     createdAt: datetime
 
@@ -34,5 +34,5 @@ class TransactionModel(BaseModel):
 class TransferModel(BaseModel):
     fromEmail: str
     toEmail: str
-    amount: int
+    amount: int = Field(ge=1)
     createdAt: datetime
