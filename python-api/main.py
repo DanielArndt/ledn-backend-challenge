@@ -128,7 +128,6 @@ async def create_transaction(
     credentials: HTTPBasicCredentials = Depends(security.http_basic),
 ):
     security.validate_credentials(credentials)
-    # FIXME: Should the createdAt time be set by the admin, or by the server?
     transaction_jsonable = jsonable_encoder(transaction)
     new_transaction = await db["transactions"].insert_one(transaction_jsonable)
     return str(new_transaction.inserted_id)
