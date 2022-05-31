@@ -2,6 +2,7 @@ import os
 from base64 import b64encode
 
 import main
+from fastapi import status
 from fastapi.testclient import TestClient
 
 
@@ -64,6 +65,19 @@ def test_create_transaction():
         },
     )
     assert response.status_code == 201
+
+
+def test_create_transaction_bad_type():
+    response = client.post(
+        "/transactions",
+        json={
+            "userEmail": "testuser@test.com",
+            "amount": 5,
+            "type": "badtype",
+            "createdAt": "2019-12-20T20:18:11.806Z",
+        },
+    )
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
 
 
 def test_create_transfer():

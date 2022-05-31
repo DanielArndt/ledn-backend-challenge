@@ -1,4 +1,5 @@
 from datetime import datetime
+from enum import Enum
 from typing import Optional
 
 from pydantic import BaseModel
@@ -16,10 +17,15 @@ class AccountModel(BaseModel):
     referredBy: Optional[str]
 
 
+class TransactionType(str, Enum):
+    SEND = "send"
+    RECEIVE = "receive"
+
+
 class TransactionModel(BaseModel):
     userEmail: str
     amount: int
-    type: str
+    type: TransactionType
     createdAt: datetime
 
 
