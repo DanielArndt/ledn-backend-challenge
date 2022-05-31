@@ -20,6 +20,8 @@ class AccountModel(BaseModel):
 class TransactionType(str, Enum):
     SEND = "send"
     RECEIVE = "receive"
+    CREDIT = "credit"
+    DEBIT = "debit"
 
 
 class TransactionModel(BaseModel):

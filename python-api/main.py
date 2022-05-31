@@ -81,7 +81,7 @@ async def get_account_balance(email: str):
                 },
             ]
         )
-        .to_list(2)
+        .to_list(4)
     )
     amount_received = next(
         (
@@ -99,8 +99,24 @@ async def get_account_balance(email: str):
         ),
         0,
     )
+    credits = next(
+        (
+            result["amount"]
+            for result in received_aggregate
+            if result["_id"]["type"] == "credit"
+        ),
+        0,
+    )
+    debits = next(
+        (
+            result["amount"]
+            for result in received_aggregate
+            if result["_id"]["type"] == "debit"
+        ),
+        0,
+    )
 
-    return amount_received - amount_sent
+    return amount_received + credits - amount_sent - debits
 
 
 @app.post(

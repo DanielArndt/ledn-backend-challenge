@@ -60,13 +60,26 @@ def test_get_account_balance_bad_email():
     assert response.json() == 0
 
 
-def test_create_transaction():
+def test_create_transaction_credit():
     response = client.post(
         "/transactions",
         json={
             "userEmail": "testuser@test.com",
             "amount": 5,
-            "type": "receive",
+            "type": "credit",
+            "createdAt": "2019-12-20T20:18:11.806Z",
+        },
+    )
+    assert response.status_code == 201
+
+
+def test_create_transaction_debit():
+    response = client.post(
+        "/transactions",
+        json={
+            "userEmail": "testuser@test.com",
+            "amount": 5,
+            "type": "debit",
             "createdAt": "2019-12-20T20:18:11.806Z",
         },
     )
