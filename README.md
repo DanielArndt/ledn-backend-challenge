@@ -66,7 +66,7 @@ docker compose exec -it python_api sh -c "pytest test/test_api.py"
 
 An additional test exists in `test/test_large_data.py` which is a very basic test that creates 150000 new transactions, and then checks the balance of the user has updated accordingly. This is simply to validate the API works with large data sets and is not robust in any sense. It takes several minutes to run since no optimization was done here.
 
-## Requirements
+## Submission Requirements
 
 Using HTTP Basic Authentication (username: `admin`, password: `ledn_admin`), the user should be able to make the following requests to meet the requirements:
 
