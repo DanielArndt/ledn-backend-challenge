@@ -1,16 +1,12 @@
+import os
 import secrets
-
-from fastapi import FastAPI, HTTPException, Depends, status
+from typing import List
 
 import motor.motor_asyncio
-import os
-from pydantic import BaseModel
-from typing import List, Optional
-from datetime import datetime
+from fastapi import Depends, FastAPI, HTTPException, status
 from fastapi.encoders import jsonable_encoder
 from fastapi.security import HTTPBasic, HTTPBasicCredentials
-from models import AccountModel, TransactionModel
-
+from models import AccountModel, TransactionModel, TransferModel
 
 app = FastAPI()
 security = HTTPBasic()
@@ -110,7 +106,6 @@ async def get_account_balance(email: str):
 async def create_transaction(transaction: TransactionModel):
     # TODO: Revisit: Is this API sufficient to preform the following?
     # - Debit and credit account
-    # - Transfer between users
 
     # FIXME: Should the createdAt time be set by the admin, or by the server?
     transaction_jsonable = jsonable_encoder(transaction)
@@ -120,3 +115,27 @@ async def create_transaction(transaction: TransactionModel):
     )
 
     return created_transaction
+
+
+@app.post(
+    "/transfers",
+    response_description="Create a transfer between two users",
+    response_model=List[str],
+    status_code=201,
+)
+async def create_transfer(transfer: TransferModel):
+    from_transaction = TransactionModel(
+        userEmail=transfer.fromEmail,
+        amount=transfer.amount,
+        type="send",
+        createdAt=transfer.createdAt,
+    )
+    to_transaction = TransactionModel(
+        userEmail=transfer.toEmail,
+        amount=transfer.amount,
+        type="receive",
+        createdAt=transfer.createdAt,
+    )
+    transactions = jsonable_encoder([from_transaction, to_transaction])
+    response = await db["transactions"].insert_many(transactions)
+    return [str(id) for id in response.inserted_ids]

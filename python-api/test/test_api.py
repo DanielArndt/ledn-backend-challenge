@@ -1,8 +1,8 @@
-from fastapi.testclient import TestClient
 import os
 from base64 import b64encode
 
 import main
+from fastapi.testclient import TestClient
 
 
 def encode_basic_auth(username, password):
@@ -64,3 +64,17 @@ def test_create_transaction():
         },
     )
     assert response.status_code == 201
+
+
+def test_create_transfer():
+    response = client.post(
+        "/transfers",
+        json={
+            "fromEmail": "from@email.com",
+            "toEmail": "to@email.com",
+            "amount": 10,
+            "createdAt": "2019-12-20T20:18:11.806Z",
+        },
+    )
+    assert response.status_code == 201
+    assert len(response.json()) == 2
