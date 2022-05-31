@@ -7,7 +7,7 @@ from fastapi import Depends, FastAPI, HTTPException, status
 from fastapi.encoders import jsonable_encoder
 from fastapi.security import HTTPBasic, HTTPBasicCredentials
 
-from models import AccountModel, TransactionModel, TransactionType, TransferModel
+from models import AccountModel, TransactionModel, TransferModel
 
 app = FastAPI()
 security = HTTPBasic()
@@ -68,32 +68,37 @@ async def get_account(
     response_model=int,
 )
 async def get_account_balance(email: str):
-    # FIXME: there's probably a way to do this in one query, instead of two
     received_aggregate = (
         await db["transactions"]
         .aggregate(
             [
-                {"$match": {"userEmail": email, "type": "receive"}},
-                {"$group": {"_id": None, "amount_received": {"$sum": "$amount"}}},
+                {"$match": {"userEmail": email}},
+                {
+                    "$group": {
+                        "_id": {"type": "$type"},
+                        "amount": {"$sum": "$amount"},
+                    }
+                },
             ]
         )
-        .to_list(1000)
+        .to_list(2)
     )
-    sent_aggregate = (
-        await db["transactions"]
-        .aggregate(
-            [
-                {"$match": {"userEmail": email, "type": "send"}},
-                {"$group": {"_id": None, "amount_sent": {"$sum": "$amount"}}},
-            ]
-        )
-        .to_list(1000)
+    amount_received = next(
+        (
+            result["amount"]
+            for result in received_aggregate
+            if result["_id"]["type"] == "receive"
+        ),
+        0,
     )
-
-    amount_received = (
-        received_aggregate[0]["amount_received"] if received_aggregate else 0
+    amount_sent = next(
+        (
+            result["amount"]
+            for result in received_aggregate
+            if result["_id"]["type"] == "send"
+        ),
+        0,
     )
-    amount_sent = sent_aggregate[0]["amount_sent"] if sent_aggregate else 0
 
     return amount_received - amount_sent
 
@@ -116,30 +121,6 @@ async def create_transaction(transaction: TransactionModel):
     )
 
     return created_transaction
-
-
-@app.post(
-    "/transfers",
-    response_description="Create a transfer between two users",
-    response_model=List[str],
-    status_code=201,
-)
-async def create_transfer(transfer: TransferModel):
-    from_transaction = TransactionModel(
-        userEmail=transfer.fromEmail,
-        amount=transfer.amount,
-        type="send",
-        createdAt=transfer.createdAt,
-    )
-    to_transaction = TransactionModel(
-        userEmail=transfer.toEmail,
-        amount=transfer.amount,
-        type="receive",
-        createdAt=transfer.createdAt,
-    )
-    transactions = jsonable_encoder([from_transaction, to_transaction])
-    response = await db["transactions"].insert_many(transactions)
-    return [str(id) for id in response.inserted_ids]
 
 
 @app.post(
