@@ -95,7 +95,7 @@ async def get_account_balance(
     "/transactions",
     response_description="Create a transaction",
     response_model=str,
-    status_code=201,
+    status_code=status.HTTP_201_CREATED,
 )
 async def create_transaction(
     transaction: TransactionModel,
@@ -111,7 +111,7 @@ async def create_transaction(
     "/transfers",
     response_description="Create a transfer between two users",
     response_model=List[str],
-    status_code=201,
+    status_code=status.HTTP_201_CREATED,
 )
 async def create_transfer(
     transfer: TransferModel,

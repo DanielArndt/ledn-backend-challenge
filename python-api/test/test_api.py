@@ -21,7 +21,7 @@ def test_get_account():
     response = client.get(
         "/accounts/Cassandre10@gmail.com", headers={"Authorization": AUTH_HEADER}
     )
-    assert response.status_code == 200
+    assert response.status_code == status.HTTP_200_OK
     assert response.json()["email"] == "Cassandre10@gmail.com"
     assert response.json()["firstName"] == "Sydnie"
 
@@ -31,21 +31,21 @@ def test_get_account_bad_password():
         "/accounts/Cassandre10@gmail.com",
         headers={"Authorization": BAD_PASSWORD_AUTH_HEADER},
     )
-    assert response.status_code == 401
+    assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
 
 def test_get_account_no_auth():
     response = client.get(
         "/accounts/Cassandre10@gmail.com",
     )
-    assert response.status_code == 401
+    assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
 
 def test_get_account_bad_email():
     response = client.get(
         "/accounts/notfound@gmail.com", headers={"Authorization": AUTH_HEADER}
     )
-    assert response.status_code == 404
+    assert response.status_code == status.HTTP_404_NOT_FOUND
 
 
 def test_get_account_balance():
@@ -76,7 +76,7 @@ def test_create_transaction_credit():
         },
         headers={"Authorization": AUTH_HEADER},
     )
-    assert response.status_code == 201
+    assert response.status_code == status.HTTP_201_CREATED
 
 
 def test_create_transaction_debit():
@@ -90,7 +90,7 @@ def test_create_transaction_debit():
         },
         headers={"Authorization": AUTH_HEADER},
     )
-    assert response.status_code == 201
+    assert response.status_code == status.HTTP_201_CREATED
 
 
 def test_create_transaction_bad_type():
@@ -118,5 +118,5 @@ def test_create_transfer():
         },
         headers={"Authorization": AUTH_HEADER},
     )
-    assert response.status_code == 201
+    assert response.status_code == status.HTTP_201_CREATED
     assert len(response.json()) == 2
