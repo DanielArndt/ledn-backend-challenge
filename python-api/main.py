@@ -1,5 +1,4 @@
 import os
-import secrets
 from typing import List
 
 import motor.motor_asyncio
@@ -7,15 +6,12 @@ from fastapi import Depends, FastAPI, HTTPException, status
 from fastapi.encoders import jsonable_encoder
 from fastapi.security import HTTPBasic, HTTPBasicCredentials
 
+import security
 from models import AccountModel, TransactionModel, TransferModel
 
 app = FastAPI()
-security = HTTPBasic()
 client = motor.motor_asyncio.AsyncIOMotorClient(os.environ["MONGODB_URL"])
 db = client.ledn
-
-ADMIN_USERNAME = os.environ["LEDN_ADMIN_USERNAME"]
-ADMIN_PASSWORD = os.environ["LEDN_ADMIN_PASSWORD"]
 
 
 @app.get(
@@ -23,7 +19,10 @@ ADMIN_PASSWORD = os.environ["LEDN_ADMIN_PASSWORD"]
     response_description="List all accounts",
     response_model=List[AccountModel],
 )
-async def list_accounts():
+async def list_accounts(
+    credentials: HTTPBasicCredentials = Depends(security.http_basic),
+):
+    security.validate_credentials(credentials)
     accounts = await db["accounts"].find().to_list(1000)
     return accounts
 
@@ -33,7 +32,10 @@ async def list_accounts():
     response_description="List all transactions",
     response_model=List[TransactionModel],
 )
-async def list_transactions():
+async def list_transactions(
+    credentials: HTTPBasicCredentials = Depends(security.http_basic),
+):
+    security.validate_credentials(credentials)
     transactions = await db["transactions"].find().to_list(1000)
     return transactions
 
@@ -44,16 +46,9 @@ async def list_transactions():
     response_model=AccountModel,
 )
 async def get_account(
-    email: str, credentials: HTTPBasicCredentials = Depends(security)
+    email: str, credentials: HTTPBasicCredentials = Depends(security.http_basic)
 ):
-    correct_username = secrets.compare_digest(credentials.username, ADMIN_USERNAME)
-    correct_password = secrets.compare_digest(credentials.password, ADMIN_PASSWORD)
-    if not (correct_username and correct_password):
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Incorrect email or password",
-            headers={"WWW-Authenticate": "Basic"},
-        )
+    security.validate_credentials(credentials)
     account = await db["accounts"].find_one({"email": email})
     if not account:
         raise HTTPException(
@@ -67,7 +62,10 @@ async def get_account(
     response_description="Get the balance for an account",
     response_model=int,
 )
-async def get_account_balance(email: str):
+async def get_account_balance(
+    email: str, credentials: HTTPBasicCredentials = Depends(security.http_basic)
+):
+    security.validate_credentials(credentials)
     received_aggregate = (
         await db["transactions"]
         .aggregate(
@@ -125,10 +123,11 @@ async def get_account_balance(email: str):
     response_model=TransactionModel,
     status_code=201,
 )
-async def create_transaction(transaction: TransactionModel):
-    # TODO: Revisit: Is this API sufficient to preform the following?
-    # - Debit and credit account
-
+async def create_transaction(
+    transaction: TransactionModel,
+    credentials: HTTPBasicCredentials = Depends(security.http_basic),
+):
+    security.validate_credentials(credentials)
     # FIXME: Should the createdAt time be set by the admin, or by the server?
     transaction_jsonable = jsonable_encoder(transaction)
     new_transaction = await db["transactions"].insert_one(transaction_jsonable)
@@ -145,7 +144,11 @@ async def create_transaction(transaction: TransactionModel):
     response_model=List[str],
     status_code=201,
 )
-async def create_transfer(transfer: TransferModel):
+async def create_transfer(
+    transfer: TransferModel,
+    credentials: HTTPBasicCredentials = Depends(security.http_basic),
+):
+    security.validate_credentials(credentials)
     from_transaction = TransactionModel(
         userEmail=transfer.fromEmail,
         amount=transfer.amount,

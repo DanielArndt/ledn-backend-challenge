@@ -49,13 +49,18 @@ def test_get_account_bad_email():
 
 
 def test_get_account_balance():
-    response = client.get("/accounts/Cassandre10@gmail.com/balance")
+    response = client.get(
+        "/accounts/Cassandre10@gmail.com/balance",
+        headers={"Authorization": AUTH_HEADER},
+    )
     # Manually validated, ensure it doesn't change
     assert response.json() == 2800789356
 
 
 def test_get_account_balance_bad_email():
-    response = client.get("/accounts/notfound@gmail.com/balance")
+    response = client.get(
+        "/accounts/notfound@gmail.com/balance", headers={"Authorization": AUTH_HEADER}
+    )
     # Arguably, this should return a 404, but still seems like it would be a valid response
     assert response.json() == 0
 
@@ -69,6 +74,7 @@ def test_create_transaction_credit():
             "type": "credit",
             "createdAt": "2019-12-20T20:18:11.806Z",
         },
+        headers={"Authorization": AUTH_HEADER},
     )
     assert response.status_code == 201
 
@@ -82,6 +88,7 @@ def test_create_transaction_debit():
             "type": "debit",
             "createdAt": "2019-12-20T20:18:11.806Z",
         },
+        headers={"Authorization": AUTH_HEADER},
     )
     assert response.status_code == 201
 
@@ -95,6 +102,7 @@ def test_create_transaction_bad_type():
             "type": "badtype",
             "createdAt": "2019-12-20T20:18:11.806Z",
         },
+        headers={"Authorization": AUTH_HEADER},
     )
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
 
@@ -108,6 +116,7 @@ def test_create_transfer():
             "amount": 10,
             "createdAt": "2019-12-20T20:18:11.806Z",
         },
+        headers={"Authorization": AUTH_HEADER},
     )
     assert response.status_code == 201
     assert len(response.json()) == 2
