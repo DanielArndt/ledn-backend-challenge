@@ -13,7 +13,7 @@ client = TestClient(main.app)
 ADMIN_USERNAME = os.environ["LEDN_ADMIN_USERNAME"]
 ADMIN_PASSWORD = os.environ["LEDN_ADMIN_PASSWORD"]
 AUTH_HEADER = encode_basic_auth(ADMIN_USERNAME, ADMIN_PASSWORD)
-BAD_AUTH_HEADER = encode_basic_auth(ADMIN_USERNAME, "Bad password")
+BAD_PASSWORD_AUTH_HEADER = encode_basic_auth(ADMIN_USERNAME, "Bad password")
 
 
 def test_get_account():
@@ -27,7 +27,8 @@ def test_get_account():
 
 def test_get_account_bad_password():
     response = client.get(
-        "/accounts/Cassandre10@gmail.com", headers={"Authorization": BAD_AUTH_HEADER}
+        "/accounts/Cassandre10@gmail.com",
+        headers={"Authorization": BAD_PASSWORD_AUTH_HEADER},
     )
     assert response.status_code == 401
 
