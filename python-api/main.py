@@ -66,7 +66,7 @@ async def get_account_balance(
     email: str, credentials: HTTPBasicCredentials = Depends(security.http_basic)
 ):
     security.validate_credentials(credentials)
-    received_aggregate = (
+    aggregate = (
         await db["transactions"]
         .aggregate(
             [
@@ -84,7 +84,7 @@ async def get_account_balance(
     amount_received = next(
         (
             result["amount"]
-            for result in received_aggregate
+            for result in aggregate
             if result["_id"]["type"] == "receive"
         ),
         0,
@@ -92,7 +92,7 @@ async def get_account_balance(
     amount_sent = next(
         (
             result["amount"]
-            for result in received_aggregate
+            for result in aggregate
             if result["_id"]["type"] == "send"
         ),
         0,
@@ -100,7 +100,7 @@ async def get_account_balance(
     credits = next(
         (
             result["amount"]
-            for result in received_aggregate
+            for result in aggregate
             if result["_id"]["type"] == "credit"
         ),
         0,
@@ -108,7 +108,7 @@ async def get_account_balance(
     debits = next(
         (
             result["amount"]
-            for result in received_aggregate
+            for result in aggregate
             if result["_id"]["type"] == "debit"
         ),
         0,

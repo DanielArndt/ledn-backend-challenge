@@ -4,22 +4,23 @@
 
 I tried to focus on a few priorities
 - Code readability
-    - Auto formatting to keep everything consistent: `black`, `isort`
+    - Including auto formatting to keep everything consistent: `black`, `isort`
 - API structure / readability
-    - Auto generated documentation (see `/docs` in the browser)
+    - Including auto generated documentation (see `/docs` in the browser)
 - Portability / ease of development
     - Docker for a reproducible environment
     - Dev environment with auto reload on code change for quick iteration
-    - Python container is interactive, allowing the developer to easily attach a debugger
     - No external dependencies required (beyond docker)
-        - Can run the platform and tests without installing anything beyond docker
+        - Can run the platform and tests without installing anything except docker
         - Should run on any OS and machine without conflicts
-    - Simple integration tests
+    - Very simple integration tests
         - Allows quick iteration, with a reasonable chance of not breaking things
         - However, the tests are not exhaustive. They do not catch all edge cases, but should address the main requirements
         - Some tests depend on the sample data. They are not idempotent.
     
 ## Compromises / notable omissions
+
+Many compromises were made to limit the time spent, and scope.
 
 - I used Python instead of Typescript due to familiarity. I have dabbled in Typescript, but have not used it extensively.
 - In an attempt to achieve a middle ground on familiarity, I used Mongo DB (which I am also unfamiliar with). Therefore, my approach on some database related tasks may be lacking.
