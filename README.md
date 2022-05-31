@@ -72,34 +72,35 @@ Using HTTP Basic Authentication (username: `admin`, password: `ledn_admin`), the
 
 > The admin user should be able to get an account and its current balance (the data provided may contain negative balances).
 
-    * `GET /accounts/{email}`
-    * `GET /accounts/{email}/balance`
+* `GET /accounts/{email}`
+* `GET /accounts/{email}/balance`
 
 > The admin user should be able to debit and credit an account;
-    * `POST /transactions/` with `type` of `credit` or `debit`
-      
-      Example body: 
-      ```json
-      {
+
+* `POST /transactions/` with `type` of `credit` or `debit`
+    
+    Example body: 
+    ```json
+    {
         "userEmail": "user@email.com",
         "amount": 10,
         "type": "credit",
         "createdAt": "2022-05-31T18:08:57.752Z"
-      }
-      ```
+    }
+    ```
 
 > The admin user should be able to make an amount transfer from one user to another.
 
-    * `POST /transfers/`
+* `POST /transfers/`
 
-      Example body:
-      ```json
-      {
+    Example body:
+    ```json
+    {
         "fromEmail": "fromuser@email.com",
         "toEmail": "touser@email.com",
         "amount": 10,
         "createdAt": "2022-05-31T18:13:32.374Z"
-      }
-      ```
+    }
+    ```
 
 The docs located at http://localhost:8000/docs will provide more details along with sample JSON. See the tests in `python-api/test/tests_api.py` for more realisitic examples.
