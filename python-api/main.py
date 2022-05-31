@@ -15,7 +15,7 @@ db = client.ledn
 
 
 async def validate_account_exists(email: str):
-    account = await db["accounts"].find_one({"email": email})
+    account = await db["accounts"].count_documents({"email": email})
     return True if account else False
 
 
