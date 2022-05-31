@@ -10,7 +10,7 @@ class AccountModel(BaseModel):
     lastName: str
     country: str
     email: str
-    dob: str
+    dob: datetime
     mfa: Optional[str]
     createdAt: datetime
     updatedAt: datetime
