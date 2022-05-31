@@ -14,6 +14,11 @@ client = motor.motor_asyncio.AsyncIOMotorClient(os.environ["MONGODB_URL"])
 db = client.ledn
 
 
+async def validate_account_exists(email: str):
+    account = await db["accounts"].find_one({"email": email})
+    return True if account else False
+
+
 @app.get(
     "/accounts",
     response_description="List the first 1000 accounts",
@@ -102,6 +107,12 @@ async def create_transaction(
     credentials: HTTPBasicCredentials = Depends(security.http_basic),
 ):
     security.validate_credentials(credentials)
+    account_exists = await validate_account_exists(transaction.userEmail)
+    if not account_exists:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="fromEmail: account not found",
+        )
     transaction_jsonable = jsonable_encoder(transaction)
     new_transaction = await db["transactions"].insert_one(transaction_jsonable)
     return str(new_transaction.inserted_id)
@@ -118,6 +129,18 @@ async def create_transfer(
     credentials: HTTPBasicCredentials = Depends(security.http_basic),
 ):
     security.validate_credentials(credentials)
+    from_account_exists = await validate_account_exists(transfer.fromEmail)
+    if not from_account_exists:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="fromEmail: account not found",
+        )
+    to_account_exists = await validate_account_exists(transfer.toEmail)
+    if not to_account_exists:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="toEmail: account not found",
+        )
     from_transaction = TransactionModel(
         userEmail=transfer.fromEmail,
         amount=transfer.amount,

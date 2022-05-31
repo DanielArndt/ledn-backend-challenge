@@ -69,7 +69,7 @@ def test_create_transaction_credit():
     response = client.post(
         "/transactions",
         json={
-            "userEmail": "testuser@test.com",
+            "userEmail": "Dylan_Lockman@yahoo.com",
             "amount": 5,
             "type": "credit",
             "createdAt": "2019-12-20T20:18:11.806Z",
@@ -83,7 +83,7 @@ def test_create_transaction_debit():
     response = client.post(
         "/transactions",
         json={
-            "userEmail": "testuser@test.com",
+            "userEmail": "Dylan_Lockman@yahoo.com",
             "amount": 5,
             "type": "debit",
             "createdAt": "2019-12-20T20:18:11.806Z",
@@ -97,7 +97,7 @@ def test_create_transaction_bad_type():
     response = client.post(
         "/transactions",
         json={
-            "userEmail": "testuser@test.com",
+            "userEmail": "Dylan_Lockman@yahoo.com",
             "amount": 5,
             "type": "badtype",
             "createdAt": "2019-12-20T20:18:11.806Z",
@@ -111,8 +111,8 @@ def test_create_transfer():
     response = client.post(
         "/transfers",
         json={
-            "fromEmail": "from@email.com",
-            "toEmail": "to@email.com",
+            "fromEmail": "Estella_Metz40@gmail.com",
+            "toEmail": "Dylan_Lockman@yahoo.com",
             "amount": 10,
             "createdAt": "2019-12-20T20:18:11.806Z",
         },
