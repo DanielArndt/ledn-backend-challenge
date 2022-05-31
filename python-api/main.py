@@ -16,7 +16,7 @@ db = client.ledn
 
 @app.get(
     "/accounts",
-    response_description="List all accounts",
+    response_description="List the first 1000 accounts",
     response_model=List[AccountModel],
 )
 async def list_accounts(
@@ -29,7 +29,7 @@ async def list_accounts(
 
 @app.get(
     "/transactions",
-    response_description="List all transactions",
+    response_description="List the first 1000 transactions",
     response_model=List[TransactionModel],
 )
 async def list_transactions(
@@ -42,7 +42,7 @@ async def list_transactions(
 
 @app.get(
     "/accounts/{email}",
-    response_description="Get specific account",
+    response_description="Get details of an account",
     response_model=AccountModel,
 )
 async def get_account(
@@ -120,7 +120,7 @@ async def get_account_balance(
 @app.post(
     "/transactions",
     response_description="Create a transaction",
-    response_model=TransactionModel,
+    response_model=str,
     status_code=201,
 )
 async def create_transaction(
@@ -131,11 +131,7 @@ async def create_transaction(
     # FIXME: Should the createdAt time be set by the admin, or by the server?
     transaction_jsonable = jsonable_encoder(transaction)
     new_transaction = await db["transactions"].insert_one(transaction_jsonable)
-    created_transaction = await db["transactions"].find_one(
-        {"_id": new_transaction.inserted_id}
-    )
-
-    return created_transaction
+    return str(new_transaction.inserted_id)
 
 
 @app.post(
