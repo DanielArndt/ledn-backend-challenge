@@ -9,6 +9,7 @@ from typing import List, Optional
 from datetime import datetime
 from fastapi.encoders import jsonable_encoder
 from fastapi.security import HTTPBasic, HTTPBasicCredentials
+from models import AccountModel, TransactionModel
 
 
 app = FastAPI()
@@ -20,18 +21,6 @@ ADMIN_USERNAME = os.environ["LEDN_ADMIN_USERNAME"]
 ADMIN_PASSWORD = os.environ["LEDN_ADMIN_PASSWORD"]
 
 
-class AccountModel(BaseModel):
-    firstName: str
-    lastName: str
-    country: str
-    email: str
-    dob: str
-    mfa: Optional[str]
-    createdAt: datetime
-    updatedAt: datetime
-    referredBy: Optional[str]
-
-
 @app.get(
     "/accounts",
     response_description="List all accounts",
@@ -40,13 +29,6 @@ class AccountModel(BaseModel):
 async def list_accounts():
     accounts = await db["accounts"].find().to_list(1000)
     return accounts
-
-
-class TransactionModel(BaseModel):
-    userEmail: str
-    amount: int
-    type: str
-    createdAt: datetime
 
 
 @app.get(
