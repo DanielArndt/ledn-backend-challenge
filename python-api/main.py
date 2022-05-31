@@ -4,7 +4,7 @@ from typing import List
 import motor.motor_asyncio
 from fastapi import Depends, FastAPI, HTTPException, status
 from fastapi.encoders import jsonable_encoder
-from fastapi.security import HTTPBasic, HTTPBasicCredentials
+from fastapi.security import HTTPBasicCredentials
 
 import security
 from models import AccountModel, TransactionModel, TransferModel
