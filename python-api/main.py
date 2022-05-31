@@ -81,40 +81,14 @@ async def get_account_balance(
         )
         .to_list(4)
     )
-    amount_received = next(
-        (
-            result["amount"]
-            for result in aggregate
-            if result["_id"]["type"] == "receive"
-        ),
-        0,
-    )
-    amount_sent = next(
-        (
-            result["amount"]
-            for result in aggregate
-            if result["_id"]["type"] == "send"
-        ),
-        0,
-    )
-    credits = next(
-        (
-            result["amount"]
-            for result in aggregate
-            if result["_id"]["type"] == "credit"
-        ),
-        0,
-    )
-    debits = next(
-        (
-            result["amount"]
-            for result in aggregate
-            if result["_id"]["type"] == "debit"
-        ),
-        0,
-    )
+    sum_amount = {result["_id"]["type"]: result["amount"] for result in aggregate}
 
-    return amount_received + credits - amount_sent - debits
+    return (
+        sum_amount.get("receive", 0)
+        + sum_amount.get("credit", 0)
+        - sum_amount.get("send", 0)
+        - sum_amount.get("debit", 0)
+    )
 
 
 @app.post(
