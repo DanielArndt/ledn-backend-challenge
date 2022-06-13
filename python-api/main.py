@@ -8,15 +8,11 @@ from fastapi.security import HTTPBasicCredentials
 
 import security
 from models import AccountModel, TransactionModel, TransferModel
+from services import AccountService, TransactionService
 
 app = FastAPI()
 client = motor.motor_asyncio.AsyncIOMotorClient(os.environ["MONGODB_URL"])
 db = client.ledn
-
-
-async def validate_account_exists(email: str):
-    account = await db["accounts"].count_documents({"email": email})
-    return True if account else False
 
 
 @app.get(
@@ -54,7 +50,7 @@ async def get_account(
     email: str, credentials: HTTPBasicCredentials = Depends(security.http_basic)
 ):
     security.validate_credentials(credentials)
-    account = await db["accounts"].find_one({"email": email})
+    account = await AccountService(db).get_account(email)
     if not account:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="Account not found"
@@ -71,29 +67,8 @@ async def get_account_balance(
     email: str, credentials: HTTPBasicCredentials = Depends(security.http_basic)
 ):
     security.validate_credentials(credentials)
-    aggregate = (
-        await db["transactions"]
-        .aggregate(
-            [
-                {"$match": {"userEmail": email}},
-                {
-                    "$group": {
-                        "_id": {"type": "$type"},
-                        "amount": {"$sum": "$amount"},
-                    }
-                },
-            ]
-        )
-        .to_list(4)
-    )
-    sum_amount = {result["_id"]["type"]: result["amount"] for result in aggregate}
-
-    return (
-        sum_amount.get("receive", 0)
-        + sum_amount.get("credit", 0)
-        - sum_amount.get("send", 0)
-        - sum_amount.get("debit", 0)
-    )
+    balance = await AccountService(db).get_balance(email)
+    return balance
 
 
 @app.post(
@@ -107,15 +82,14 @@ async def create_transaction(
     credentials: HTTPBasicCredentials = Depends(security.http_basic),
 ):
     security.validate_credentials(credentials)
-    account_exists = await validate_account_exists(transaction.userEmail)
+    account_exists = await AccountService(db).is_valid_account(transaction.userEmail)
     if not account_exists:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="fromEmail: account not found",
+            detail="userEmail: account not found",
         )
-    transaction_jsonable = jsonable_encoder(transaction)
-    new_transaction = await db["transactions"].insert_one(transaction_jsonable)
-    return str(new_transaction.inserted_id)
+    inserted_id = await TransactionService(db).create_transaction(transaction)
+    return inserted_id
 
 
 @app.post(
@@ -129,30 +103,20 @@ async def create_transfer(
     credentials: HTTPBasicCredentials = Depends(security.http_basic),
 ):
     security.validate_credentials(credentials)
-    from_account_exists = await validate_account_exists(transfer.fromEmail)
+    account_service = AccountService(db)
+    from_account_exists = await account_service.is_valid_account(transfer.fromEmail)
     if not from_account_exists:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="fromEmail: account not found",
         )
-    to_account_exists = await validate_account_exists(transfer.toEmail)
+    to_account_exists = await account_service.is_valid_account(transfer.toEmail)
     if not to_account_exists:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="toEmail: account not found",
         )
-    from_transaction = TransactionModel(
-        userEmail=transfer.fromEmail,
-        amount=transfer.amount,
-        type="send",
-        createdAt=transfer.createdAt,
+    inserted_ids = await TransactionService(db).transfer(
+        transfer.fromEmail, transfer.toEmail, transfer.amount, transfer.createdAt
     )
-    to_transaction = TransactionModel(
-        userEmail=transfer.toEmail,
-        amount=transfer.amount,
-        type="receive",
-        createdAt=transfer.createdAt,
-    )
-    transactions = jsonable_encoder([from_transaction, to_transaction])
-    response = await db["transactions"].insert_many(transactions)
-    return [str(id) for id in response.inserted_ids]
+    return inserted_ids
